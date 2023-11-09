@@ -4,7 +4,7 @@
 #include "engine/core/input.h"
 #include "engine/key_codes.h"
 
-player::player() : m_timer(0.0f), m_speed(1.0f)
+player::player() : m_timer(0.0f), m_speed(5.0f)
 {
 	;
 }
@@ -23,12 +23,42 @@ void player::initialise(engine::ref<engine::game_object> object)
 
 void player::on_update(const engine::timestep& time_step)
 {
-	m_object->set_position(m_object->position() += m_object->forward() * m_speed * (float)time_step); // moving forwards
 	m_object->set_rotation_amount(atan2(m_object->forward().x, m_object->forward().z));
 
-	if (engine::input::key_pressed(engine::key_codes::KEY_1)) // left
+	// Start with no movement direction
+	glm::vec3 movement_direction = glm::vec3(0.f);
+
+	// Check for forward movement
+	if (engine::input::key_pressed(engine::key_codes::KEY_W)) // Move forward
+	{
+		m_object->set_position(m_object->position() + glm::normalize(m_object->forward()) * m_speed * (float)time_step);
+	}
+
+	if (engine::input::key_pressed(engine::key_codes::KEY_S)) // Move back
+	{
+		m_object->set_position(m_object->position() - glm::normalize(m_object->forward()) * m_speed * (float)time_step);
+	}
+
+	//////// Check for left/right movement and update the forward vector accordingly
+	if (engine::input::key_pressed(engine::key_codes::KEY_A)) // Move left
+	{
+		// Calculate the left direction vector for strafing
+		glm::vec3 left_direction = -glm::normalize(glm::cross(m_object->forward(), m_object->up()));
+		m_object->set_position(m_object->position() + left_direction * m_speed * (float)time_step);
+	}
+
+	if (engine::input::key_pressed(engine::key_codes::KEY_D)) // Move right
+	{
+		// Calculate the right direction vector for strafing
+		glm::vec3 right_direction = glm::normalize(glm::cross(m_object->forward(), m_object->up()));
+		m_object->set_position(m_object->position() + right_direction * m_speed * (float)time_step);
+	}
+
+
+
+	if (engine::input::key_pressed(engine::key_codes::KEY_Q)) // left
 		turn(1.0f * time_step);
-	else if (engine::input::key_pressed(engine::key_codes::KEY_2)) // right
+	else if (engine::input::key_pressed(engine::key_codes::KEY_E)) // right
 		turn(-1.0f * time_step);
 	else if (engine::input::key_pressed(engine::key_codes::KEY_SPACE)) // space
 		jump();
@@ -40,7 +70,7 @@ void player::on_update(const engine::timestep& time_step)
 		{
 			m_object->animated_mesh()->switch_root_movement(false);
 			m_object->animated_mesh()->switch_animation(m_object->animated_mesh()->default_animation());
-			m_speed = 1.0f;
+			m_speed = 5.0f;
 		}
 	}
 
@@ -49,7 +79,13 @@ void player::on_update(const engine::timestep& time_step)
 
 void player::turn(float angle)
 {
+	///// Rotate the forward vector around the Y-axis
 	m_object->set_forward(glm::rotate(m_object->forward(), angle, glm::vec3(0.f, 1.f, 0.f)));
+
+	// Recalculate the right vector based on the new forward vector
+	m_object->set_right(glm::normalize(glm::cross(m_object->forward(), glm::vec3(0.f, 1.f, 0.f))));
+
+	// The up vector should remain the same if you're only rotating around the Y-axis
 }
 
 void player::update_camera(engine::perspective_camera& camera)
@@ -70,7 +106,7 @@ void player::jump()
 {
 	m_object->animated_mesh()->switch_root_movement(true);
 	m_object->animated_mesh()->switch_animation(3);
-	m_speed = 0.0f;
+	m_speed = 5.0f;
 	m_timer = m_object->animated_mesh()->animations().at(3)->mDuration;
 }
 

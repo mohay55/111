@@ -134,12 +134,14 @@
     <ClInclude Include="src\example_layer.h" />
     <ClInclude Include="src\intro_layer.h" />
     <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\rock.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\example_layer.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\intro_layer.cpp" />
     <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\rock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\engine\engine.vcxproj">

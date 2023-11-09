@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "engine/events/key_event.h"
 #include "engine/utils/track.h"
+#include "rock.h"
 
 example_layer::example_layer() 
     :m_2d_camera(-1.6f, 1.6f, -0.9f, 0.9f), 
@@ -53,6 +54,12 @@ example_layer::example_layer()
 	m_mannequin_material = engine::material::create(1.0f, glm::vec3(0.5f, 0.5f, 0.5f),
 		glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.5f, 0.5f, 0.5f), 1.0f);
 
+	m_rock_material = engine::material::create(32.0f,/////////
+		glm::vec3(1.0f, 0.5f, 0.0f),
+		glm::vec3(1.0f, 0.5f, 0.0f),
+		glm::vec3(0.5f, 0.5f, 0.5f),
+		0.3f);
+
 
 	// Skybox texture from http://www.vwall.it/wp-content/plugins/canvasio3dpro/inc/resource/cubeMaps/
 	m_skybox = engine::skybox::create(50.f,
@@ -93,7 +100,7 @@ example_layer::example_layer()
 	m_terrain = engine::game_object::create(terrain_props);
 
 	// Load the cow model. Create a cow object. Set its properties
-	engine::ref <engine::model> cow_model = engine::model::create("assets/models/static/cow4.3ds");
+	/*//////////engine::ref <engine::model> cow_model = engine::model::create("assets/models/static/cow4.3ds");
 	engine::game_object_properties cow_props;
 	cow_props.meshes = cow_model->meshes();
 	cow_props.textures = cow_model->textures();
@@ -101,7 +108,7 @@ example_layer::example_layer()
 	cow_props.position = { -4.f,0.5f, -5.f };
 	cow_props.scale = glm::vec3(cow_scale);
 	cow_props.bounding_shape = cow_model->size() / 2.f * cow_scale;
-	m_cow = engine::game_object::create(cow_props);
+	m_cow = engine::game_object::create(cow_props);*/
 
 	// Load the tree model. Create a tree object. Set its properties
 	engine::ref <engine::model> tree_model = engine::model::create("assets/models/static/elm.3ds");
@@ -114,7 +121,7 @@ example_layer::example_layer()
 	tree_props.scale = glm::vec3(tree_scale);
 	m_tree = engine::game_object::create(tree_props);
 
-	engine::ref<engine::sphere> sphere_shape = engine::sphere::create(10, 20, 0.5f);
+	/*///////////engine::ref<engine::sphere> sphere_shape = engine::sphere::create(10, 20, 0.5f);
 	engine::game_object_properties sphere_props;
 	sphere_props.position = { 0.f, 5.f, -5.f };
 	sphere_props.meshes = { sphere_shape->mesh() };
@@ -122,10 +129,30 @@ example_layer::example_layer()
 	sphere_props.bounding_shape = glm::vec3(0.5f);
 	sphere_props.restitution = 0.92f;
 	sphere_props.mass = 0.000001f;
-	m_ball = engine::game_object::create(sphere_props);
+	m_ball = engine::game_object::create(sphere_props);*/
+
+	//////////////////////////////////////
+	std::vector<glm::vec3> rock_vertices;
+	// Define the 8 vertices of a cube
+	rock_vertices.push_back(glm::vec3(-0.5f, -0.5f, 0.5f)); // Front-bottom-left
+	rock_vertices.push_back(glm::vec3(0.5f, -0.5f, 0.5f)); // Front-bottom-right
+	rock_vertices.push_back(glm::vec3(0.5f, 0.5f, 0.5f)); // Front-top-right
+	rock_vertices.push_back(glm::vec3(-0.5f, 0.5f, 0.5f)); // Front-top-left
+	rock_vertices.push_back(glm::vec3(-0.5f, -0.5f, -0.5f)); // Back-bottom-left
+	rock_vertices.push_back(glm::vec3(0.5f, -0.5f, -0.5f)); // Back-bottom-right
+	rock_vertices.push_back(glm::vec3(0.5f, 0.5f, -0.5f)); // Back-top-right
+	rock_vertices.push_back(glm::vec3(-0.5f, 0.5f, -0.5f)); // Back-top-left
+
+	engine::ref<engine::rock> rock_shape = engine::rock::create(rock_vertices);
+	engine::game_object_properties rock_props;
+	rock_props.position = { 0.f, 1.f, 1.f };
+	rock_props.meshes = { rock_shape->mesh() };
+	std::vector<engine::ref<engine::texture_2d>> rock_textures = { engine::texture_2d::create("assets/textures/rocks/rock 1.png", false) };
+	rock_props.textures = rock_textures;
+	m_rock = engine::game_object::create(rock_props);
 
 	m_game_objects.push_back(m_terrain);
-	m_game_objects.push_back(m_ball);
+	//////////m_game_objects.push_back(m_ball);
 	//m_game_objects.push_back(m_cow);
 	//m_game_objects.push_back(m_tree);
 	//m_game_objects.push_back(m_pickup);
@@ -140,18 +167,18 @@ example_layer::~example_layer() {}
 
 void example_layer::on_update(const engine::timestep& time_step) 
 {
-    /////////// m_3d_camera.on_update(time_step);
+    // m_3d_camera.on_update(time_step);
 
 	m_physics_manager->dynamics_world_update(m_game_objects, double(time_step));
 
 	m_player.on_update(time_step);
 	m_player.update_camera(m_3d_camera);
 
-	m_mannequin->animated_mesh()->on_update(time_step);
+	// m_mannequin->animated_mesh()->on_update(time_step);
 
 	m_audio_manager->update_with_camera(m_3d_camera);
 
-	check_bounce();
+	///////check_bounce();
 } 
 
 void example_layer::on_render() 
@@ -177,20 +204,23 @@ void example_layer::on_render()
 
 	engine::renderer::submit(mesh_shader, m_terrain);
 
+	//////////
+	engine::renderer::submit(mesh_shader, m_rock);
+
 	glm::mat4 tree_transform(1.0f);
 	tree_transform = glm::translate(tree_transform, glm::vec3(4.f, 0.5, -5.0f));
 	tree_transform = glm::rotate(tree_transform, m_tree->rotation_amount(), m_tree->rotation_axis());
 	tree_transform = glm::scale(tree_transform, m_tree->scale());
 	engine::renderer::submit(mesh_shader, tree_transform, m_tree);
 	
-	glm::mat4 cow_transform(1.0f);
+	/*//////////glm::mat4 cow_transform(1.0f);
 	cow_transform = glm::translate(cow_transform, m_cow->position());
 	cow_transform = glm::rotate(cow_transform, m_cow->rotation_amount(), m_cow->rotation_axis());
 	cow_transform = glm::scale(cow_transform, m_cow->scale());
-	engine::renderer::submit(mesh_shader, cow_transform, m_cow);
+	engine::renderer::submit(mesh_shader, cow_transform, m_cow);*/
 
-	m_material->submit(mesh_shader);
-	engine::renderer::submit(mesh_shader, m_ball);
+	/////////m_material->submit(mesh_shader);
+	/////////engine::renderer::submit(mesh_shader, m_ball);
 
 	m_mannequin_material->submit(mesh_shader);
 	engine::renderer::submit(mesh_shader, m_player.object());
@@ -214,10 +244,10 @@ void example_layer::on_event(engine::event& event)
     } 
 }
 
-void example_layer::check_bounce()
-{
-	if (m_prev_sphere_y_vel < 0.1f && m_ball->velocity().y > 0.1f)
-		//m_audio_manager->play("bounce");
-		m_audio_manager->play_spatialised_sound("bounce", m_3d_camera.position(), glm::vec3(m_ball->position().x, 0.f, m_ball->position().z));
-	m_prev_sphere_y_vel = m_game_objects.at(1)->velocity().y;
-}
+//////////void example_layer::check_bounce()
+//{
+//	if (m_prev_sphere_y_vel < 0.1f && m_ball->velocity().y > 0.1f)
+//		//m_audio_manager->play("bounce");
+//		m_audio_manager->play_spatialised_sound("bounce", m_3d_camera.position(), glm::vec3(m_ball->position().x, 0.f, m_ball->position().z));
+//	m_prev_sphere_y_vel = m_game_objects.at(1)->velocity().y;
+//}

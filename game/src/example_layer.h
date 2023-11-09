@@ -13,18 +13,20 @@ public:
     void on_event(engine::event& event) override;
 
 private:
-	void check_bounce();
+	//////void check_bounce();
 
 	engine::ref<engine::skybox>			m_skybox{};
 	engine::ref<engine::game_object>	m_terrain{};
-	engine::ref<engine::game_object>	m_cow{};
+	///////////////engine::ref<engine::game_object>	m_cow{};
 	engine::ref<engine::game_object>	m_tree{};
-	engine::ref<engine::game_object>	m_ball{};
+	///////////engine::ref<engine::game_object>	m_ball{};
 	engine::ref<engine::game_object>	m_mannequin{};
+	engine::ref<engine::game_object>	m_rock{}; /////////
 	player								m_player{};
 
 	engine::ref<engine::material>		m_material{};
 	engine::ref<engine::material>		m_mannequin_material{};
+	engine::ref<engine::material>		m_rock_material{};//////////
 
 	engine::DirectionalLight            m_directionalLight;
 
